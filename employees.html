@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Employee Directory - Employee Payroll and Performance Appraisal Management System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Employee Directory</h1>
+        <p class="page-subtitle">View and manage all registered employees, their designations, and compensation details.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('add_employee') }}" class="btn btn-primary" id="btnAddEmployeeHeader">
+            <i class="fa-solid fa-user-plus"></i> Add New Employee
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="fa-solid fa-users-rectangle" style="color: var(--primary);"></i>
+            All Registered Employees
+            <span class="emp-id-badge" style="margin-left: 0.5rem; background: var(--primary-light); color: var(--primary);">
+                {{ employees|length }} Total
+            </span>
+        </div>
+        <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input 
+                type="text" 
+                id="employeeSearch" 
+                class="search-input" 
+                placeholder="Search by ID, name, or department..."
+                autocomplete="off"
+            >
+        </div>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="data-table" id="employeesTable">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Basic Salary</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if employees %}
+                        {% for emp in employees %}
+                            <tr>
+                                <td>
+                                    <span class="emp-id-badge">{{ emp.emp_id }}</span>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 700; color: var(--secondary);">{{ emp.name }}</div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted);">Joined: {{ (emp.created_at|string)[:10] if emp.created_at else 'Recent' }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: #f1f5f9; color: #334155; border: 1px solid var(--border);">
+                                        <i class="fa-regular fa-folder" style="margin-right: 0.25rem;"></i>
+                                        {{ emp.department }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 500;">{{ emp.designation }}</span>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 700; color: #065f46; font-family: 'Inter', monospace;">
+                                        ₹{{ "{:,.2f}".format(emp.basic_salary) }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Per Month</div>
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    <div style="display: inline-flex; gap: 0.4rem;">
+                                        <a href="{{ url_for('payroll', emp_id=emp.emp_id) }}" class="btn btn-secondary btn-sm" title="Generate Payroll Payslip">
+                                            <i class="fa-solid fa-receipt" style="color: var(--success);"></i> Payroll
+                                        </a>
+                                        <a href="{{ url_for('appraisal', emp_id=emp.emp_id) }}" class="btn btn-secondary btn-sm" title="Evaluate Performance">
+                                            <i class="fa-solid fa-award" style="color: var(--warning);"></i> Appraisal
+                                        </a>
+                                        <form action="{{ url_for('delete_employee', emp_id=emp.emp_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete employee {{ emp.name }} ({{ emp.emp_id }})? This action cannot be undone.');">
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--danger);" title="Delete Employee">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 3rem 1rem;">
+                                <div style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                                    <i class="fa-solid fa-users-slash"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary);">No Employees Registered Yet</h3>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; margin-bottom: 1.25rem;">
+                                    Get started by adding your first employee record.
+                                </p>
+                                <a href="{{ url_for('add_employee') }}" class="btn btn-primary">
+                                    <i class="fa-solid fa-user-plus"></i> Add Employee
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

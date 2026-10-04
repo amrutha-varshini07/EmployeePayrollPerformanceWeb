@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Employee Payroll and Performance Appraisal Management System - A modern web application for managing employees, payroll calculation, payslip generation, and performance appraisal.">
+    <title>{% block title %}Employee Payroll & Performance Appraisal System{% endblock %}</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('dashboard') }}" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <div>
+                    <div class="brand-title">Employee Management System</div>
+                    <span class="brand-badge">Payroll & Appraisal</span>
+                </div>
+            </a>
+            {% if current_username %}
+            <ul class="nav-links">
+                <li>
+                    <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('add_employee') }}" class="nav-link {% if request.endpoint == 'add_employee' %}active{% endif %}">
+                        <i class="fa-solid fa-user-plus"></i> Add Employee
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('view_employees') }}" class="nav-link {% if request.endpoint == 'view_employees' %}active{% endif %}">
+                        <i class="fa-solid fa-users"></i> View Employees
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('payroll') }}" class="nav-link {% if request.endpoint in ['payroll', 'view_payslip'] %}active{% endif %}">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Payroll
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('appraisal') }}" class="nav-link {% if request.endpoint == 'appraisal' %}active{% endif %}">
+                        <i class="fa-solid fa-award"></i> Performance Appraisal
+                    </a>
+                </li>
+                <li style="margin-left: 0.5rem; display: flex; align-items: center; gap: 0.6rem;">
+                    <span style="font-size: 0.85rem; color: #c7d2fe; background: rgba(255, 255, 255, 0.12); padding: 0.35rem 0.75rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <i class="fa-solid fa-circle-user"></i> {{ current_username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm" id="navLogoutBtn" style="padding: 0.38rem 0.8rem; font-size: 0.82rem;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </li>
+            </ul>
+            {% else %}
+            <ul class="nav-links">
+                <li>
+                    <a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-wrapper">
+        <!-- Flash Message Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alerts-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                {% if category == 'success' %}
+                                    <i class="fa-solid fa-circle-check"></i>
+                                {% elif category == 'danger' %}
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-circle-info"></i>
+                                {% endif %}
+                                <span>{{ message }}</span>
+                            </div>
+                            <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Content Block -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

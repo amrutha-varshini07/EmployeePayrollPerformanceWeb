@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Employee - Employee Payroll and Performance Appraisal Management System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Add New Employee</h1>
+        <p class="page-subtitle">Register a new employee into the system for automated payroll and appraisal tracking.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('view_employees') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Employee Directory
+        </a>
+    </div>
+</div>
+
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-id-card" style="color: var(--primary);"></i>
+                Employee Details Form
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);"><span class="required" style="color: var(--danger);">*</span> All fields are required</span>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('add_employee') }}" method="POST" id="addEmployeeForm">
+                <div class="form-grid">
+                    <!-- Employee ID -->
+                    <div class="form-group">
+                        <label for="emp_id" class="form-label">
+                            Employee ID <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="emp_id" 
+                            name="emp_id" 
+                            class="form-control" 
+                            placeholder="Enter Employee ID" 
+                            value="{{ form_data.get('emp_id', '') }}" 
+                            required
+                            autocomplete="off"
+                        >
+                        <div id="empIdFeedback" style="min-height: 1.25rem; margin-top: 0.35rem; font-size: 0.82rem;"></div>
+                        <div class="form-hint">Must be unique (e.g. letters and numbers).</div>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            Full Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            class="form-control" 
+                            placeholder="Enter full name" 
+                            value="{{ form_data.get('name', '') }}" 
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-hint">Official full name of the employee.</div>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Department -->
+                    <div class="form-group">
+                        <label for="department" class="form-label">
+                            Department <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="department" 
+                            name="department" 
+                            class="form-control" 
+                            list="departmentList" 
+                            placeholder="Enter department" 
+                            value="{{ form_data.get('department', '') }}" 
+                            required
+                            autocomplete="off"
+                        >
+                        <datalist id="departmentList">
+                            <option value="Engineering">
+                            <option value="Human Resources">
+                            <option value="Finance">
+                            <option value="Marketing">
+                            <option value="Operations">
+                            <option value="Information Technology">
+                            <option value="Sales">
+                        </datalist>
+                        <div class="form-hint">Select or type a department name.</div>
+                    </div>
+
+                    <!-- Designation -->
+                    <div class="form-group">
+                        <label for="designation" class="form-label">
+                            Designation / Job Role <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="designation" 
+                            name="designation" 
+                            class="form-control" 
+                            placeholder="Enter designation" 
+                            value="{{ form_data.get('designation', '') }}" 
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-hint">Current professional title.</div>
+                    </div>
+                </div>
+
+                <!-- Basic Salary -->
+                <div class="form-group">
+                    <label for="basic_salary" class="form-label">
+                        Basic Salary (Monthly) <span class="required">*</span>
+                    </label>
+                    <div class="input-prefix-wrapper">
+                        <span class="input-prefix">₹</span>
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            min="0.01" 
+                            id="basic_salary" 
+                            name="basic_salary" 
+                            class="form-control input-with-prefix" 
+                            placeholder="Enter basic monthly salary" 
+                            value="{{ form_data.get('basic_salary', '') }}" 
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+                    <div class="form-hint">Must be a positive value greater than 0. Used as basis for all payroll calculations.</div>
+                </div>
+
+                <!-- Submission Actions -->
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+                    <a href="{{ url_for('view_employees') }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitEmployee">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Employee Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

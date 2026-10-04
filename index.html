@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Employee Payroll and Performance Appraisal Management System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Employee Payroll and Performance Appraisal Management System</h1>
+        <p class="page-subtitle">Central management portal for employee records, payroll calculation, and appraisal evaluations.</p>
+    </div>
+</div>
+
+<!-- Key System Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon indigo">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Total Employees</div>
+            <div class="stat-value">{{ total_employees }}</div>
+            <span class="stat-badge badge-good">Active Personnel</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon emerald">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Monthly Payroll Base</div>
+            <div class="stat-value">₹{{ "{:,.2f}".format(total_payroll) }}</div>
+            <span class="stat-badge badge-excellent">Base Salaries</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon amber">
+            <i class="fa-solid fa-star-half-stroke"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Avg. Appraisal Score</div>
+            <div class="stat-value">{{ avg_score }} / 100</div>
+            <span class="stat-badge badge-satisfactory">Rating: {{ avg_rating }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon sky">
+            <i class="fa-solid fa-file-invoice"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Generated Payslips</div>
+            <div class="stat-value">{{ total_payslips }}</div>
+            <span class="stat-badge badge-good">Processed</span>
+        </div>
+    </div>
+</div>
+
+<!-- Department Breakdown & Recent Employees -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1rem;" class="dashboard-split">
+    <!-- Recent Employees Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-user-clock" style="color: var(--primary);"></i>
+                Recently Added Employees
+            </div>
+            <a href="{{ url_for('view_employees') }}" class="btn btn-secondary btn-sm">
+                View All <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Emp ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Basic Salary</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_employees %}
+                            {% for emp in recent_employees %}
+                                <tr>
+                                    <td><span class="emp-id-badge">{{ emp.emp_id }}</span></td>
+                                    <td style="font-weight: 600;">{{ emp.name }}</td>
+                                    <td>{{ emp.department }}</td>
+                                    <td style="font-weight: 600; color: #065f46;">₹{{ "{:,.2f}".format(emp.basic_salary) }}</td>
+                                    <td>
+                                        <a href="{{ url_for('payroll', emp_id=emp.emp_id) }}" class="btn btn-secondary btn-sm" title="Calculate Payroll">
+                                            <i class="fa-solid fa-receipt"></i>
+                                        </a>
+                                        <a href="{{ url_for('appraisal', emp_id=emp.emp_id) }}" class="btn btn-secondary btn-sm" title="Evaluate Performance">
+                                            <i class="fa-solid fa-star"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    No employees found. <a href="{{ url_for('add_employee') }}">Add an employee</a>.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Distribution Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-building" style="color: #6366f1;"></i>
+                Departments
+            </div>
+        </div>
+        <div class="card-body">
+            {% if departments %}
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                    {% for dept in departments %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px dashed var(--border);">
+                            <span style="font-weight: 500; font-size: 0.9rem;">
+                                <i class="fa-regular fa-folder" style="margin-right: 0.4rem; color: var(--primary);"></i>
+                                {{ dept.department }}
+                            </span>
+                            <span class="emp-id-badge" style="background: var(--primary-light); color: var(--primary);">
+                                {{ dept.count }} {{ 'Employee' if dept.count == 1 else 'Employees' }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-muted); font-size: 0.88rem;">No department data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

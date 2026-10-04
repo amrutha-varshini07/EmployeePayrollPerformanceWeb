@@ -1,0 +1,25 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local SQLite databases and logs
+*.db
+*.sqlite3
+*.db-journal
+*.log
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE configurations
+.vscode/
+.idea/

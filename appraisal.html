@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}Performance Appraisal - Employee Payroll and Performance Appraisal Management System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Performance Appraisal Management</h1>
+        <p class="page-subtitle">Evaluate employee competencies across Productivity, Quality, Teamwork, and Attendance to calculate overall ratings.</p>
+    </div>
+</div>
+
+<!-- Appraisal Evaluation Card & Form -->
+<div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.5rem; margin-bottom: 2rem;" class="appraisal-split">
+    <!-- Form Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i>
+                Appraisal Scoring Form
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Scores must be 0 – 100</span>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('appraisal') }}" method="POST" id="appraisalForm">
+                <!-- Employee Selection -->
+                <div class="form-group">
+                    <label for="appraisalEmpSelect" class="form-label">
+                        Select Employee <span class="required" style="color: var(--danger);">*</span>
+                    </label>
+                    <select name="emp_id" id="appraisalEmpSelect" class="form-control" required>
+                        <option value="">-- Choose an Employee --</option>
+                        {% for emp in employees %}
+                            <option value="{{ emp.emp_id }}" {% if selected_emp_id == emp.emp_id %}selected{% endif %}>
+                                {{ emp.emp_id }} - {{ emp.name }} ({{ emp.department }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 4 Core Competency Scores -->
+                <div class="form-grid">
+                    <!-- Productivity -->
+                    <div class="form-group">
+                        <label for="productivity" class="form-label">
+                            Productivity Score (0-100) <span class="required" style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="productivity" 
+                            name="productivity" 
+                            class="form-control" 
+                            min="0" 
+                            max="100" 
+                            step="0.1" 
+                            placeholder="Enter score 0-100" 
+                            value="{{ form_data.get('productivity', '') }}"
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-hint">Output speed, volume, and milestone delivery.</div>
+                    </div>
+
+                    <!-- Quality -->
+                    <div class="form-group">
+                        <label for="quality" class="form-label">
+                            Quality Score (0-100) <span class="required" style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="quality" 
+                            name="quality" 
+                            class="form-control" 
+                            min="0" 
+                            max="100" 
+                            step="0.1" 
+                            placeholder="Enter score 0-100" 
+                            value="{{ form_data.get('quality', '') }}"
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-hint">Accuracy, precision, and adherence to standards.</div>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Teamwork -->
+                    <div class="form-group">
+                        <label for="teamwork" class="form-label">
+                            Teamwork Score (0-100) <span class="required" style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="teamwork" 
+                            name="teamwork" 
+                            class="form-control" 
+                            min="0" 
+                            max="100" 
+                            step="0.1" 
+                            placeholder="Enter score 0-100" 
+                            value="{{ form_data.get('teamwork', '') }}"
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-hint">Collaboration, communication, and peer support.</div>
+                    </div>
+
+                    <!-- Attendance -->
+                    <div class="form-group">
+                        <label for="attendance" class="form-label">
+                            Attendance Score (0-100) <span class="required" style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="attendance" 
+                            name="attendance" 
+                            class="form-control" 
+                            min="0" 
+                            max="100" 
+                            step="0.1" 
+                            placeholder="Enter score 0-100" 
+                            value="{{ form_data.get('attendance', '') }}"
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-hint">Punctuality, presence, and schedule adherence.</div>
+                    </div>
+                </div>
+
+                <!-- Review Remarks -->
+                <div class="form-group">
+                    <label for="remarks" class="form-label">Manager Feedback & Remarks</label>
+                    <textarea id="remarks" name="remarks" class="form-control" rows="2" placeholder="Enter evaluation comments or feedback" autocomplete="off">{{ form_data.get('remarks', '') }}</textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <button type="submit" class="btn btn-primary" id="btnSubmitAppraisal">
+                        <i class="fa-solid fa-check-to-slot"></i> Submit Appraisal Evaluation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Preview & Rating Scale Guide -->
+    <div>
+        <!-- Instant Live Score Card -->
+        <div class="card" style="border: 2px solid var(--primary-light);">
+            <div class="card-header" style="background: var(--primary-light);">
+                <div class="card-title" style="color: var(--primary); font-size: 1rem;">
+                    <i class="fa-solid fa-gauge-high"></i> Live Evaluation Gauge
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; color: var(--primary);">Real-Time</span>
+            </div>
+            <div class="card-body" style="text-align: center; padding: 1.5rem;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em;">
+                    Calculated Overall Score
+                </div>
+                <div style="font-size: 3rem; font-weight: 800; color: var(--secondary); margin: 0.25rem 0;" id="liveScore">
+                    --.--
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <span class="badge" id="liveRating" style="background: #e2e8f0; color: #475569; font-size: 0.9rem; padding: 0.35rem 1rem;">
+                        Awaiting Inputs
+                    </span>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                    Formula: (Productivity + Quality + Teamwork + Attendance) / 4
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Criteria Reference Guide -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title" style="font-size: 0.95rem;">
+                    <i class="fa-solid fa-scale-balanced" style="color: #64748b;"></i>
+                    Official Appraisal Rating Scale
+                </div>
+            </div>
+            <div class="card-body" style="padding: 0.75rem 1.25rem;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 0.45rem 0;"><strong>90.00 – 100.00</strong></td>
+                            <td style="padding: 0.45rem 0; text-align: right;"><span class="badge badge-excellent">Excellent</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 0.45rem 0;"><strong>75.00 – 89.99</strong></td>
+                            <td style="padding: 0.45rem 0; text-align: right;"><span class="badge badge-good">Good (e.g. 80.00)</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 0.45rem 0;"><strong>60.00 – 74.99</strong></td>
+                            <td style="padding: 0.45rem 0; text-align: right;"><span class="badge badge-satisfactory">Satisfactory</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 0.45rem 0;"><strong>50.00 – 59.99</strong></td>
+                            <td style="padding: 0.45rem 0; text-align: right;"><span class="badge badge-average">Average</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.45rem 0;"><strong>Below 50.00</strong></td>
+                            <td style="padding: 0.45rem 0; text-align: right;"><span class="badge badge-needs-improvement">Needs Improvement</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Evaluated Result Display -->
+{% if evaluated_result %}
+<div class="score-result-card" id="appraisalResultCard">
+    <div class="score-banner">
+        <div class="score-circle-container">
+            <div class="score-badge-big">
+                <span class="score-badge-val">{{ "{:.2f}".format(evaluated_result.overall_score) }}</span>
+                <span class="score-badge-unit">OUT OF 100</span>
+            </div>
+            <div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: var(--secondary);">
+                    {{ evaluated_result.employee.name }} ({{ evaluated_result.employee.emp_id }})
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    {{ evaluated_result.employee.department }} &bull; {{ evaluated_result.employee.designation }}
+                </div>
+                <div style="margin-top: 0.4rem;">
+                    Rating Status:
+                    {% set r = evaluated_result.rating %}
+                    <span class="badge 
+                        {% if r == 'Excellent' %}badge-excellent
+                        {% elif r == 'Good' %}badge-good
+                        {% elif r == 'Satisfactory' %}badge-satisfactory
+                        {% elif r == 'Average' %}badge-average
+                        {% else %}badge-needs-improvement{% endif %}
+                    " style="font-size: 0.85rem; padding: 0.25rem 0.75rem;">
+                        {{ r }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {% if evaluated_result.remarks %}
+        <div style="max-width: 320px; background: #ffffff; padding: 0.85rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.85rem;">
+            <div style="font-weight: 600; color: var(--secondary); margin-bottom: 0.2rem;"><i class="fa-solid fa-quote-left" style="color: var(--primary);"></i> Remarks:</div>
+            <div style="color: var(--text-muted); font-style: italic;">"{{ evaluated_result.remarks }}"</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 4 Individual Competency Bars -->
+    <div class="appraisal-bars-grid">
+        <div class="score-bar-item">
+            <div class="score-bar-header">
+                <span>Productivity</span>
+                <span style="color: var(--primary);">{{ evaluated_result.productivity }} / 100</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill indigo" style="width: {{ evaluated_result.productivity }}%;"></div>
+            </div>
+        </div>
+
+        <div class="score-bar-item">
+            <div class="score-bar-header">
+                <span>Quality</span>
+                <span style="color: var(--success);">{{ evaluated_result.quality }} / 100</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill emerald" style="width: {{ evaluated_result.quality }}%;"></div>
+            </div>
+        </div>
+
+        <div class="score-bar-item">
+            <div class="score-bar-header">
+                <span>Teamwork</span>
+                <span style="color: var(--info);">{{ evaluated_result.teamwork }} / 100</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill sky" style="width: {{ evaluated_result.teamwork }}%;"></div>
+            </div>
+        </div>
+
+        <div class="score-bar-item">
+            <div class="score-bar-header">
+                <span>Attendance</span>
+                <span style="color: var(--warning);">{{ evaluated_result.attendance }} / 100</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill amber" style="width: {{ evaluated_result.attendance }}%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Appraisal History Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i>
+            Appraisal History Records
+        </div>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Productivity</th>
+                        <th>Quality</th>
+                        <th>Teamwork</th>
+                        <th>Attendance</th>
+                        <th>Overall Score</th>
+                        <th>Rating</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recent_appraisals %}
+                        {% for a in recent_appraisals %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 700;">{{ a.name }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);"><span class="emp-id-badge">{{ a.emp_id }}</span> &bull; {{ a.department }}</div>
+                                </td>
+                                <td>{{ a.productivity }}</td>
+                                <td>{{ a.quality }}</td>
+                                <td>{{ a.teamwork }}</td>
+                                <td>{{ a.attendance }}</td>
+                                <td>
+                                    <strong style="color: var(--secondary); font-size: 1rem;">{{ "{:.2f}".format(a.overall_score) }}</strong> / 100
+                                </td>
+                                <td>
+                                    {% set r = a.rating %}
+                                    <span class="badge 
+                                        {% if r == 'Excellent' %}badge-excellent
+                                        {% elif r == 'Good' %}badge-good
+                                        {% elif r == 'Satisfactory' %}badge-satisfactory
+                                        {% elif r == 'Average' %}badge-average
+                                        {% else %}badge-needs-improvement{% endif %}
+                                    ">
+                                        {{ r }}
+                                    </span>
+                                </td>
+                                <td style="font-size: 0.8rem; color: var(--text-muted);">
+                                    {{ (a.evaluated_at|string)[:10] if a.evaluated_at else 'Recent' }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                No appraisal records found yet. Use the form above to evaluate an employee.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

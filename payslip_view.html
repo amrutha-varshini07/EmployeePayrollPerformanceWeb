@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Payslip - {{ slip.name }} ({{ slip.pay_month }} {{ slip.pay_year }}){% endblock %}
+
+{% block content %}
+<div class="page-header no-print">
+    <div>
+        <h1 class="page-title">Official Payslip Statement</h1>
+        <p class="page-subtitle">Payslip Reference: #PAY-{{ "%04d"|format(slip.id) }} &bull; Generated on {{ slip.generated_at }}</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('payroll') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Payroll
+        </a>
+        <button type="button" class="btn btn-primary" onclick="window.print();">
+            <i class="fa-solid fa-print"></i> Print Payslip
+        </button>
+    </div>
+</div>
+
+<div class="payslip-container">
+    <div class="payslip-header">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div class="brand-icon" style="background: #0f172a;">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+            <div class="payslip-company-title">ACME ENTERPRISE PVT. LTD.</div>
+        </div>
+        <div class="payslip-subtitle">Employee Payroll & Performance Appraisal Management System</div>
+        <div style="margin-top: 0.5rem; font-weight: 700; color: var(--primary); text-transform: uppercase; font-size: 0.95rem; letter-spacing: 0.05em;">
+            Salary Payslip for {{ slip.pay_month }} {{ slip.pay_year }}
+        </div>
+    </div>
+
+    <!-- Metadata Table -->
+    <div class="payslip-meta-grid">
+        <div class="payslip-meta-item">
+            <span class="payslip-meta-label">Employee ID</span>
+            <span class="payslip-meta-val"><span class="emp-id-badge">{{ slip.emp_id }}</span></span>
+        </div>
+        <div class="payslip-meta-item">
+            <span class="payslip-meta-label">Employee Name</span>
+            <span class="payslip-meta-val">{{ slip.name }}</span>
+        </div>
+        <div class="payslip-meta-item">
+            <span class="payslip-meta-label">Department</span>
+            <span class="payslip-meta-val">{{ slip.department }}</span>
+        </div>
+        <div class="payslip-meta-item">
+            <span class="payslip-meta-label">Designation</span>
+            <span class="payslip-meta-val">{{ slip.designation }}</span>
+        </div>
+    </div>
+
+    <!-- Salary Breakdown Columns -->
+    <div class="salary-breakdown-grid">
+        <!-- Earnings -->
+        <div class="breakdown-box">
+            <div class="breakdown-header earnings">
+                <i class="fa-solid fa-plus-circle"></i> Earnings (Allowances)
+            </div>
+            <table class="breakdown-table">
+                <tbody>
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td class="amount">₹{{ "{:,.2f}".format(slip.basic_salary) }}</td>
+                    </tr>
+                    <tr>
+                        <td>House Rent Allowance (HRA 20%)</td>
+                        <td class="amount">₹{{ "{:,.2f}".format(slip.hra) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Dearness Allowance (DA 10%)</td>
+                        <td class="amount">₹{{ "{:,.2f}".format(slip.da) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Medical Allowance (Fixed)</td>
+                        <td class="amount">₹{{ "{:,.2f}".format(slip.medical) }}</td>
+                    </tr>
+                    <tr class="breakdown-subtotal">
+                        <td><strong>Gross Salary</strong></td>
+                        <td class="amount" style="color: #065f46;"><strong>₹{{ "{:,.2f}".format(slip.gross_salary) }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Deductions -->
+        <div class="breakdown-box">
+            <div class="breakdown-header deductions">
+                <i class="fa-solid fa-minus-circle"></i> Statutory Deductions
+            </div>
+            <table class="breakdown-table">
+                <tbody>
+                    <tr>
+                        <td>Provident Fund (PF 12%)</td>
+                        <td class="amount">₹{{ "{:,.2f}".format(slip.pf) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Professional Tax (PT)</td>
+                        <td class="amount">₹{{ "{:,.2f}".format(slip.tax) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Other Deductions</td>
+                        <td class="amount">₹0.00</td>
+                    </tr>
+                    <tr style="visibility: hidden;">
+                        <td>Spacer</td>
+                        <td class="amount">₹0.00</td>
+                    </tr>
+                    <tr class="breakdown-subtotal">
+                        <td><strong>Total Deductions</strong></td>
+                        <td class="amount" style="color: #991b1b;"><strong>₹{{ "{:,.2f}".format(slip.total_deductions) }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Net Pay Banner -->
+    <div class="net-pay-banner">
+        <div>
+            <div class="net-pay-label">Net Payable Amount</div>
+            <div style="font-size: 0.8rem; color: #cbd5e1;">(Gross Earnings − Total Deductions)</div>
+        </div>
+        <div class="net-pay-amount">
+            ₹{{ "{:,.2f}".format(slip.net_salary) }}
+        </div>
+    </div>
+
+    <!-- Signatures & Authorization -->
+    <div style="display: flex; justify-content: space-between; margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+        <div style="text-align: center;">
+            <div style="width: 180px; border-top: 1px solid #94a3b8; margin-bottom: 0.25rem;"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Employee Signature</span>
+        </div>
+        <div style="text-align: center;">
+            <div style="width: 180px; border-top: 1px solid #94a3b8; margin-bottom: 0.25rem;"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Authorized Signatory</span>
+        </div>
+    </div>
+
+    <div class="payslip-footer-note">
+        This computer-generated document requires no physical stamp when authenticated electronically.
+    </div>
+</div>
+{% endblock %}
